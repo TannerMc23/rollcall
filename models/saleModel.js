@@ -44,6 +44,41 @@ async function recordSale(tireId, quantity, salePrice, customerName) {
   }
 }
 
+// Deleting a sale puts the stock back, since a removed sale (a test entry,
+// or a deal that fell through) means those units never actually left
+// inventory. Locks the sale row so it can't be deleted twice at once.
+async function deleteSale(saleId) {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const saleResult = await client.query(
+      'SELECT tire_id, quantity FROM sales WHERE id = $1 FOR UPDATE',
+      [saleId]
+    );
+
+    if (saleResult.rows.length === 0) {
+      throw new Error('That sale could not be found.');
+    }
+
+    const { tire_id, quantity } = saleResult.rows[0];
+
+    await client.query(
+      'UPDATE tires SET quantity = quantity + $1 WHERE id = $2',
+      [quantity, tire_id]
+    );
+
+    await client.query('DELETE FROM sales WHERE id = $1', [saleId]);
+
+    await client.query('COMMIT');
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
+
 async function getRecentSales(limit = 10) {
   const result = await pool.query(
     `SELECT sales.id, sales.quantity, sales.sale_price, sales.customer_name, sales.sale_date,
@@ -68,6 +103,7 @@ async function getTodaysSalesTotal() {
 
 module.exports = {
   recordSale,
+  deleteSale,
   getRecentSales,
   getTodaysSalesTotal
 };

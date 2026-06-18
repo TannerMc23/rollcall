@@ -15,4 +15,6 @@ router.post(
   saleController.recordSale
 );
 
+router.post('/sales/:id/delete', checkAuth, saleController.deleteSale);
+
 module.exports = router;

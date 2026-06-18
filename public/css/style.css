@@ -207,13 +207,25 @@ input:focus, select:focus {
 
 .sale-row {
   display: flex;
+  align-items: center;
   justify-content: space-between;
+  gap: 12px;
   font-size: 14px;
   padding: 8px 4px;
   border-bottom: 1px solid var(--color-border);
 }
 .sale-row:last-child { border-bottom: none; }
 .sale-amount { font-weight: 600; }
+.sale-delete-form { margin: 0; }
+.btn-delete {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  padding: 4px 6px;
+  cursor: pointer;
+}
+.btn-delete:hover { color: var(--color-danger); text-decoration: underline; }
 
 .login-body {
   display: flex;

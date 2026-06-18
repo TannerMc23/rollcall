@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>RollCall — Vantyx tire tracker</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
+
 <body>
   <header class="site-header">
     <div class="header-inner">
@@ -17,155 +19,177 @@
   <main class="container">
 
     <% if (message) { %>
-      <div class="flash flash-<%= messageType %>"><%= message %></div>
-    <% } %>
-
-    <section class="stats-grid">
-      <div class="stat-card">
-        <p class="stat-label">Tires in stock</p>
-        <p class="stat-value"><%= stats.total_quantity %></p>
+      <div class="flash flash-<%= messageType %>">
+        <%= message %>
       </div>
-      <div class="stat-card">
-        <p class="stat-label">Low stock items</p>
-        <p class="stat-value"><%= stats.low_stock_count %></p>
-      </div>
-      <div class="stat-card">
-        <p class="stat-label">Today's sales</p>
-        <p class="stat-value">$<%= Number(todaysSales).toFixed(2) %></p>
-      </div>
-      <div class="stat-card">
-        <p class="stat-label">Inventory value</p>
-        <p class="stat-value">$<%= Number(stats.total_value).toFixed(2) %></p>
-      </div>
-    </section>
-
-    <div class="main-grid">
-
-      <section class="panel">
-        <div class="panel-header">
-          <h2>Inventory</h2>
-          <button type="button" id="toggleAddTire" class="btn btn-small">+ Add tire</button>
-        </div>
-
-        <form id="addTireForm" action="/tires" method="POST" class="add-tire-form hidden">
-          <div class="form-row">
-            <div class="form-group">
-              <label for="brand">Brand</label>
-              <input type="text" id="brand" name="brand" placeholder="e.g. Bridgestone" required>
-            </div>
-            <div class="form-group">
-              <label for="size">Size</label>
-              <input type="text" id="size" name="size" placeholder="e.g. 295/75R22.5" required>
-            </div>
-          </div>
-          <div class="form-row form-row-3">
-            <div class="form-group">
-              <label for="type">Type</label>
-              <select id="type" name="type" required>
-                <option value="New">New</option>
-                <option value="Used">Used</option>
-                <option value="Retread">Retread</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="quantity">Quantity</label>
-              <input type="number" id="quantity" name="quantity" value="0" min="0">
-            </div>
-            <div class="form-group">
-              <label for="price">Price</label>
-              <input type="number" id="price" name="price" min="0.01" step="0.01" required>
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label for="low_stock_threshold">Low stock threshold</label>
-              <input type="number" id="low_stock_threshold" name="low_stock_threshold" value="5" min="0">
-            </div>
-            <div></div>
-          </div>
-          <div class="form-actions">
-            <button type="submit" class="btn btn-primary">Add to inventory</button>
-            <button type="button" id="cancelAddTire" class="btn">Cancel</button>
-          </div>
-        </form>
-
-        <div class="table">
-          <div class="table-header">
-            <span>Tire</span><span>Type</span><span>Qty</span><span>Price</span><span>Status</span>
-          </div>
-          <% tires.forEach(function(t) { %>
-            <%
-              var status = 'In stock';
-              var statusClass = 'badge-success';
-              if (Number(t.quantity) <= 0) {
-                status = 'Out';
-                statusClass = 'badge-danger';
-              } else if (Number(t.quantity) <= Number(t.low_stock_threshold)) {
-                status = 'Low';
-                statusClass = 'badge-warning';
-              }
-            %>
-            <div class="table-row">
-              <span><%= t.brand %> <%= t.size %></span>
-              <span class="text-muted"><%= t.type %></span>
-              <span><%= t.quantity %></span>
-              <span>$<%= Number(t.price).toFixed(2) %></span>
-              <span><span class="badge <%= statusClass %>"><%= status %></span></span>
-            </div>
-          <% }); %>
-          <% if (tires.length === 0) { %>
-            <div class="table-row">
-              <span class="text-muted">No tires in inventory yet. Use "Add tire" to get started.</span>
-            </div>
-          <% } %>
-        </div>
-      </section>
-
-      <section class="panel panel-narrow">
-        <div class="panel-header">
-          <h2>Record a sale</h2>
-        </div>
-        <form action="/sales" method="POST" class="sale-form">
-          <div class="form-group">
-            <label for="tire_id">Tire</label>
-            <select id="tire_id" name="tire_id" required>
-              <% tires.forEach(function(t) { %>
-                <option value="<%= t.id %>"><%= t.brand %> <%= t.size %> (<%= t.type %>) — <%= t.quantity %> on hand</option>
-              <% }); %>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="sale_quantity">Quantity</label>
-            <input type="number" id="sale_quantity" name="quantity" value="1" min="1" required>
-          </div>
-          <div class="form-group">
-            <label for="customer_name">Customer</label>
-            <input type="text" id="customer_name" name="customer_name" placeholder="Name or company">
-          </div>
-          <button type="submit" class="btn btn-primary btn-full">Record sale</button>
-        </form>
-      </section>
-
-    </div>
-
-    <section class="panel">
-      <div class="panel-header">
-        <h2>Recent sales</h2>
-      </div>
-      <% if (recentSales.length === 0) { %>
-        <p class="text-muted">No sales recorded yet.</p>
-      <% } else { %>
-        <% recentSales.forEach(function(s) { %>
-          <div class="sale-row">
-            <span><%= s.quantity %> x <%= s.brand %> <%= s.size %><% if (s.customer_name) { %> — <%= s.customer_name %><% } %></span>
-            <span class="sale-amount">$<%= Number(s.quantity * s.sale_price).toFixed(2) %></span>
-          </div>
-        <% }); %>
       <% } %>
-    </section>
+
+        <section class="stats-grid">
+          <div class="stat-card">
+            <p class="stat-label">Tires in stock</p>
+            <p class="stat-value">
+              <%= stats.total_quantity %>
+            </p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Low stock items</p>
+            <p class="stat-value">
+              <%= stats.low_stock_count %>
+            </p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Today's sales</p>
+            <p class="stat-value">$<%= Number(todaysSales).toFixed(2) %>
+            </p>
+          </div>
+          <div class="stat-card">
+            <p class="stat-label">Inventory value</p>
+            <p class="stat-value">$<%= Number(stats.total_value).toFixed(2) %>
+            </p>
+          </div>
+        </section>
+
+        <div class="main-grid">
+
+          <section class="panel">
+            <div class="panel-header">
+              <h2>Inventory</h2>
+              <button type="button" id="toggleAddTire" class="btn btn-small">+ Add tire</button>
+            </div>
+
+            <form id="addTireForm" action="/tires" method="POST" class="add-tire-form hidden">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="brand">Brand</label>
+                  <input type="text" id="brand" name="brand" placeholder="e.g. Bridgestone" required>
+                </div>
+                <div class="form-group">
+                  <label for="size">Size</label>
+                  <input type="text" id="size" name="size" placeholder="e.g. 295/75R22.5" required>
+                </div>
+              </div>
+              <div class="form-row form-row-3">
+                <div class="form-group">
+                  <label for="type">Type</label>
+                  <select id="type" name="type" required>
+                    <option value="New">New</option>
+                    <option value="Used">Used</option>
+                    <option value="Retread">Retread</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="quantity">Quantity</label>
+                  <input type="number" id="quantity" name="quantity" value="0" min="0">
+                </div>
+                <div class="form-group">
+                  <label for="price">Price</label>
+                  <input type="number" id="price" name="price" min="0.01" step="0.01" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="low_stock_threshold">Low stock threshold</label>
+                  <input type="number" id="low_stock_threshold" name="low_stock_threshold" value="5" min="0">
+                </div>
+                <div></div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Add to inventory</button>
+                <button type="button" id="cancelAddTire" class="btn">Cancel</button>
+              </div>
+            </form>
+
+            <div class="table">
+              <div class="table-header">
+                <span>Tire</span><span>Type</span><span>Qty</span><span>Price</span><span>Status</span>
+              </div>
+              <% tires.forEach(function(t) { %>
+                <% var status='In stock' ; var statusClass='badge-success' ; if (Number(t.quantity) <=0) { status='Out'
+                  ; statusClass='badge-danger' ; } else if (Number(t.quantity) <=Number(t.low_stock_threshold)) {
+                  status='Low' ; statusClass='badge-warning' ; } %>
+                  <div class="table-row">
+                    <span>
+                      <%= t.brand %>
+                        <%= t.size %>
+                    </span>
+                    <span class="text-muted">
+                      <%= t.type %>
+                    </span>
+                    <span>
+                      <%= t.quantity %>
+                    </span>
+                    <span>$<%= Number(t.price).toFixed(2) %></span>
+                    <span><span class="badge <%= statusClass %>">
+                        <%= status %>
+                      </span></span>
+                  </div>
+                  <% }); %>
+                    <% if (tires.length===0) { %>
+                      <div class="table-row">
+                        <span class="text-muted">No tires in inventory yet. Use "Add tire" to get started.</span>
+                      </div>
+                      <% } %>
+            </div>
+          </section>
+
+          <section class="panel panel-narrow">
+            <div class="panel-header">
+              <h2>Record a sale</h2>
+            </div>
+            <form action="/sales" method="POST" class="sale-form">
+              <div class="form-group">
+                <label for="tire_id">Tire</label>
+                <select id="tire_id" name="tire_id" required>
+                  <% tires.forEach(function(t) { %>
+                    <option value="<%= t.id %>">
+                      <%= t.brand %>
+                        <%= t.size %> (<%= t.type %>) — <%= t.quantity %> on hand
+                    </option>
+                    <% }); %>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="sale_quantity">Quantity</label>
+                <input type="number" id="sale_quantity" name="quantity" value="1" min="1" required>
+              </div>
+              <div class="form-group">
+                <label for="customer_name">Customer</label>
+                <input type="text" id="customer_name" name="customer_name" placeholder="Name or company">
+              </div>
+              <button type="submit" class="btn btn-primary btn-full">Record sale</button>
+            </form>
+          </section>
+
+        </div>
+
+        <section class="panel">
+          <div class="panel-header">
+            <h2>Recent sales</h2>
+          </div>
+          <% if (recentSales.length===0) { %>
+            <p class="text-muted">No sales recorded yet.</p>
+            <% } else { %>
+              <% recentSales.forEach(function(s) { %>
+                <div class="sale-row">
+                  <span>
+                    <%= s.quantity %> x <%= s.brand %>
+                        <%= s.size %>
+                          <% if (s.customer_name) { %> — <%= s.customer_name %>
+                              <% } %>
+                  </span>
+                  <span class="sale-amount">$<%= Number(s.quantity * s.sale_price).toFixed(2) %></span>
+                  <form action="/sales/<%= s.id %>/delete" method="POST" class="sale-delete-form"
+                    onsubmit="return confirm('Remove this sale and put the stock back?');">
+                    <button type="submit" class="btn-delete" aria-label="Remove this sale">Remove</button>
+                  </form>
+                </div>
+                <% }); %>
+                  <% } %>
+        </section>
 
   </main>
 
   <script src="/js/dashboard.js"></script>
 </body>
+
 </html>

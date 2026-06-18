@@ -28,4 +28,16 @@ async function recordSale(req, res) {
   }
 }
 
-module.exports = { recordSale };
+async function deleteSale(req, res) {
+  try {
+    await saleModel.deleteSale(req.params.id);
+    res.redirect(`/dashboard?msg=${encodeURIComponent('Sale removed and stock restored.')}&type=success`);
+  } catch (err) {
+    console.error('Error deleting sale:', err);
+    res.redirect(
+      `/dashboard?msg=${encodeURIComponent(err.message || 'Could not remove that sale.')}&type=error`
+    );
+  }
+}
+
+module.exports = { recordSale, deleteSale };
