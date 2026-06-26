@@ -1,7 +1,9 @@
 const pool = require('../db/pool');
 
 async function getAllTires() {
-  const result = await pool.query('SELECT * FROM tires ORDER BY brand, size');
+  const result = await pool.query(
+    'SELECT * FROM tires WHERE is_active = true ORDER BY brand, size'
+  );
   return result.rows;
 }
 
@@ -20,6 +22,31 @@ async function addTire({ brand, size, type, quantity, price, low_stock_threshold
   return result.rows[0];
 }
 
+async function updateTire(id, { brand, size, type, quantity, price, low_stock_threshold }) {
+  const result = await pool.query(
+    `UPDATE tires
+     SET brand = $1, size = $2, type = $3, quantity = $4, price = $5, low_stock_threshold = $6
+     WHERE id = $7 AND is_active = true
+     RETURNING *`,
+    [brand, size, type, quantity, price, low_stock_threshold, id]
+  );
+  if (result.rows.length === 0) {
+    throw new Error('That tire could not be found.');
+  }
+  return result.rows[0];
+}
+
+async function deactivateTire(id) {
+  const result = await pool.query(
+    'UPDATE tires SET is_active = false WHERE id = $1 RETURNING *',
+    [id]
+  );
+  if (result.rows.length === 0) {
+    throw new Error('That tire could not be found.');
+  }
+  return result.rows[0];
+}
+
 async function getInventoryStats() {
   const result = await pool.query(`
     SELECT
@@ -27,6 +54,7 @@ async function getInventoryStats() {
       COALESCE(SUM(quantity * price), 0) AS total_value,
       COUNT(*) FILTER (WHERE quantity <= low_stock_threshold) AS low_stock_count
     FROM tires
+    WHERE is_active = true
   `);
   return result.rows[0];
 }
@@ -35,5 +63,7 @@ module.exports = {
   getAllTires,
   getTireById,
   addTire,
+  updateTire,
+  deactivateTire,
   getInventoryStats
 };

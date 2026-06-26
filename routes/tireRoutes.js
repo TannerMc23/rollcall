@@ -21,4 +21,20 @@ router.post(
   tireController.addTire
 );
 
+router.post(
+  '/tires/:id/edit',
+  checkAuth,
+  [
+    body('brand').trim().notEmpty().withMessage('Brand is required.'),
+    body('size').trim().notEmpty().withMessage('Size is required.'),
+    body('type').isIn(['New', 'Used', 'Retread']).withMessage('Choose a valid tire type.'),
+    body('price').isFloat({ gt: 0 }).withMessage('Enter a valid price.'),
+    body('quantity').isInt({ min: 0 }).withMessage('Quantity must be 0 or more.'),
+    body('low_stock_threshold').isInt({ min: 0 }).withMessage('Threshold must be 0 or more.')
+  ],
+  tireController.updateTire
+);
+
+router.post('/tires/:id/delete', checkAuth, tireController.deleteTire);
+
 module.exports = router;

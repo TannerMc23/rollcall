@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS tires (
   quantity INTEGER NOT NULL DEFAULT 0,
   price NUMERIC(10,2) NOT NULL,
   low_stock_threshold INTEGER NOT NULL DEFAULT 5,
+  is_active BOOLEAN NOT NULL DEFAULT true,
   created_at TIMESTAMP DEFAULT NOW()
 );
 

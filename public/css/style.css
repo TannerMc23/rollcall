@@ -115,7 +115,7 @@ body {
 
 .table-header, .table-row {
   display: grid;
-  grid-template-columns: 2fr 1fr 0.6fr 0.8fr 1fr;
+  grid-template-columns: 2fr 1fr 0.6fr 0.8fr 1fr 1fr;
   padding: 10px 4px;
   font-size: 14px;
   align-items: center;
@@ -226,6 +226,22 @@ input:focus, select:focus {
   cursor: pointer;
 }
 .btn-delete:hover { color: var(--color-danger); text-decoration: underline; }
+
+.row-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.tire-delete-form { margin: 0; }
+.btn-edit-tire {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  padding: 4px 6px;
+  cursor: pointer;
+}
+.btn-edit-tire:hover { color: var(--color-accent-dark); text-decoration: underline; }
 
 .login-body {
   display: flex;

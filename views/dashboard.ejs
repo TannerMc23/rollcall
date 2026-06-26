@@ -98,10 +98,51 @@
                 <button type="button" id="cancelAddTire" class="btn">Cancel</button>
               </div>
             </form>
+            <form id="editTireForm" action="" method="POST" class="add-tire-form hidden">
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="edit_brand">Brand</label>
+                  <input type="text" id="edit_brand" name="brand" required>
+                </div>
+                <div class="form-group">
+                  <label for="edit_size">Size</label>
+                  <input type="text" id="edit_size" name="size" required>
+                </div>
+              </div>
+              <div class="form-row form-row-3">
+                <div class="form-group">
+                  <label for="edit_type">Type</label>
+                  <select id="edit_type" name="type" required>
+                    <option value="New">New</option>
+                    <option value="Used">Used</option>
+                    <option value="Retread">Retread</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="edit_quantity">Quantity</label>
+                  <input type="number" id="edit_quantity" name="quantity" min="0" required>
+                </div>
+                <div class="form-group">
+                  <label for="edit_price">Price</label>
+                  <input type="number" id="edit_price" name="price" min="0.01" step="0.01" required>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="edit_low_stock_threshold">Low stock threshold</label>
+                  <input type="number" id="edit_low_stock_threshold" name="low_stock_threshold" min="0" required>
+                </div>
+                <div></div>
+              </div>
+              <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Save changes</button>
+                <button type="button" id="cancelEditTire" class="btn">Cancel</button>
+              </div>
+            </form>
 
             <div class="table">
               <div class="table-header">
-                <span>Tire</span><span>Type</span><span>Qty</span><span>Price</span><span>Status</span>
+                <span>Tire</span><span>Type</span><span>Qty</span><span>Price</span><span>Status</span><span>Actions</span>
               </div>
               <% tires.forEach(function(t) { %>
                 <% var status='In stock' ; var statusClass='badge-success' ; if (Number(t.quantity) <=0) { status='Out'
@@ -122,6 +163,14 @@
                     <span><span class="badge <%= statusClass %>">
                         <%= status %>
                       </span></span>
+                    <span class="row-actions">
+                      <button type="button" class="btn-edit-tire" data-tire='<%= JSON.stringify(t) %>'
+                        aria-label="Edit this tire">Edit</button>
+                      <form action="/tires/<%= t.id %>/delete" method="POST" class="tire-delete-form"
+                        onsubmit="return confirm('Remove this tire from inventory? It will disappear from your list, but past sales for it stay intact.');">
+                        <button type="submit" class="btn-delete" aria-label="Remove this tire">Delete</button>
+                      </form>
+                    </span>
                   </div>
                   <% }); %>
                     <% if (tires.length===0) { %>
