@@ -263,3 +263,53 @@ input:focus, select:focus {
   color: var(--color-primary);
 }
 .login-card form { margin-top: 16px; text-align: left; }
+
+/* ── Header nav ────────────────────────────────────── */
+.header-nav {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.nav-link {
+  color: #ccc;
+  text-decoration: none;
+  font-size: 14px;
+}
+.nav-link:hover { color: #fff; }
+
+/* ── Customers list ────────────────────────────────── */
+.cust-header, .cust-row {
+  display: grid;
+  grid-template-columns: 2fr 0.7fr 1fr 1fr 1fr;
+  padding: 10px 4px;
+  font-size: 14px;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid var(--color-border);
+  text-decoration: none;
+  color: var(--color-text);
+}
+.cust-header {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.cust-row:last-child { border-bottom: none; }
+.cust-row:hover { background: var(--color-bg); }
+.cust-name { font-weight: 500; }
+
+/* ── Customer detail ───────────────────────────────── */
+.back-link {
+  display: inline-block;
+  font-size: 14px;
+  color: var(--color-accent);
+  text-decoration: none;
+  margin-top: 4px;
+}
+.back-link:hover { text-decoration: underline; }
+
+/* ── Customer link in recent sales ────────────────── */
+.customer-link {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.customer-link:hover { text-decoration: underline; }

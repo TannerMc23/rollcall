@@ -22,6 +22,8 @@ async function addTire({ brand, size, type, quantity, price, low_stock_threshold
   return result.rows[0];
 }
 
+// Edits every field on an existing tire. Only touches rows that are still
+// active, since an edit shouldn't be able to resurrect a deleted tire.
 async function updateTire(id, { brand, size, type, quantity, price, low_stock_threshold }) {
   const result = await pool.query(
     `UPDATE tires
@@ -36,6 +38,11 @@ async function updateTire(id, { brand, size, type, quantity, price, low_stock_th
   return result.rows[0];
 }
 
+// "Deleting" a tire just flags it inactive rather than removing the row.
+// A hard delete would either fail (a foreign key blocks it once the tire
+// has any sales recorded against it) or force losing/orphaning that sales
+// history. This keeps past sales intact while the tire disappears from the
+// active inventory list and the sale dropdown.
 async function deactivateTire(id) {
   const result = await pool.query(
     'UPDATE tires SET is_active = false WHERE id = $1 RETURNING *',

@@ -1,8 +1,10 @@
 const pool = require('../db/pool');
+const { findOrCreateCustomer } = require('./customerModel');
 
 // Records a sale and decrements stock in a single transaction, with a row
-// lock on the tire being sold. This keeps two near-simultaneous sales of
-// the same tire from both succeeding when there's only enough stock for one.
+// lock on the tire being sold. If a customer name is provided it's linked
+// to a customers row (created on the fly if it's a new name) so their full
+// purchase history stays queryable over time.
 async function recordSale(tireId, quantity, salePrice, customerName) {
   const client = await pool.connect();
   try {
@@ -27,11 +29,16 @@ async function recordSale(tireId, quantity, salePrice, customerName) {
       [quantity, tireId]
     );
 
+    let customerId = null;
+    if (customerName && customerName.trim()) {
+      customerId = await findOrCreateCustomer(client, customerName);
+    }
+
     const saleResult = await client.query(
-      `INSERT INTO sales (tire_id, quantity, sale_price, customer_name)
-       VALUES ($1, $2, $3, $4)
+      `INSERT INTO sales (tire_id, quantity, sale_price, customer_name, customer_id)
+       VALUES ($1, $2, $3, $4, $5)
        RETURNING *`,
-      [tireId, quantity, salePrice, customerName || null]
+      [tireId, quantity, salePrice, customerName ? customerName.trim() : null, customerId]
     );
 
     await client.query('COMMIT');
@@ -44,9 +51,6 @@ async function recordSale(tireId, quantity, salePrice, customerName) {
   }
 }
 
-// Deleting a sale puts the stock back, since a removed sale (a test entry,
-// or a deal that fell through) means those units never actually left
-// inventory. Locks the sale row so it can't be deleted twice at once.
 async function deleteSale(saleId) {
   const client = await pool.connect();
   try {
@@ -81,8 +85,8 @@ async function deleteSale(saleId) {
 
 async function getRecentSales(limit = 10) {
   const result = await pool.query(
-    `SELECT sales.id, sales.quantity, sales.sale_price, sales.customer_name, sales.sale_date,
-            tires.brand, tires.size
+    `SELECT sales.id, sales.quantity, sales.sale_price, sales.customer_name,
+            sales.customer_id, sales.sale_date, tires.brand, tires.size
      FROM sales
      JOIN tires ON sales.tire_id = tires.id
      ORDER BY sales.sale_date DESC

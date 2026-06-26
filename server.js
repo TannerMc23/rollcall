@@ -7,6 +7,7 @@ const authRoutes = require('./routes/authRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const tireRoutes = require('./routes/tireRoutes');
 const saleRoutes = require('./routes/saleRoutes');
+const customerRoutes = require('./routes/customerRoutes');
 
 const app = express();
 
@@ -24,6 +25,7 @@ app.use(authRoutes);
 app.use(dashboardRoutes);
 app.use(tireRoutes);
 app.use(saleRoutes);
+app.use(customerRoutes);
 
 app.use((req, res) => res.status(404).send('Page not found.'));
 

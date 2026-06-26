@@ -1,6 +1,12 @@
 -- RollCall database schema
 -- Run this once against your Postgres database to set up the tables.
 
+CREATE TABLE IF NOT EXISTS customers (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
 CREATE TABLE IF NOT EXISTS tires (
   id SERIAL PRIMARY KEY,
   brand TEXT NOT NULL,
@@ -19,5 +25,6 @@ CREATE TABLE IF NOT EXISTS sales (
   quantity INTEGER NOT NULL,
   sale_price NUMERIC(10,2) NOT NULL,
   customer_name TEXT,
-  sale_date TIMESTAMP DEFAULT NOW()
+  sale_date TIMESTAMP DEFAULT NOW(),
+  customer_id INTEGER REFERENCES customers(id)
 );

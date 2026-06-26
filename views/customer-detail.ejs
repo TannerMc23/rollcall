@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= customer.name %> — RollCall</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <h1>RollCall</h1>
+      <nav class="header-nav">
+        <a href="/dashboard" class="nav-link">Dashboard</a>
+        <a href="/customers" class="nav-link">Customers</a>
+        <a href="/logout" class="logout-link">Log out</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    <a href="/customers" class="back-link">← All customers</a>
+
+    <div class="panel-header" style="margin: 12px 0 16px;">
+      <h2 style="margin:0; font-size:20px;"><%= customer.name %></h2>
+      <span class="text-muted" style="font-size:13px;">
+        Customer since <%= new Date(customer.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' }) %>
+      </span>
+    </div>
+
+    <div class="stats-grid" style="margin-bottom: 20px;">
+      <div class="stat-card">
+        <p class="stat-label">Total orders</p>
+        <p class="stat-value"><%= sales.length %></p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Tires purchased</p>
+        <p class="stat-value"><%= totalTires %></p>
+      </div>
+      <div class="stat-card">
+        <p class="stat-label">Total spent</p>
+        <p class="stat-value">$<%= Number(totalSpent).toFixed(2) %></p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">
+        <h2>Purchase history</h2>
+      </div>
+      <% if (sales.length === 0) { %>
+        <p class="text-muted">No purchases recorded yet.</p>
+      <% } else { %>
+        <div class="table">
+          <div class="table-header" style="grid-template-columns: 1.5fr 1fr 0.7fr 0.8fr 1fr;">
+            <span>Tire</span><span>Type</span><span>Qty</span><span>Price each</span><span>Date</span>
+          </div>
+          <% sales.forEach(function(s) { %>
+            <div class="table-row" style="grid-template-columns: 1.5fr 1fr 0.7fr 0.8fr 1fr;">
+              <span><%= s.brand %> <%= s.size %></span>
+              <span class="text-muted"><%= s.type %></span>
+              <span><%= s.quantity %></span>
+              <span>$<%= Number(s.sale_price).toFixed(2) %></span>
+              <span class="text-muted">
+                <%= new Date(s.sale_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) %>
+              </span>
+            </div>
+          <% }); %>
+        </div>
+      <% } %>
+    </div>
+  </main>
+</body>
+</html>
